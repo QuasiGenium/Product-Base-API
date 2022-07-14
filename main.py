@@ -41,7 +41,7 @@ def get_one_product(product_id):
     list_of_products = [i.to_dict() for i in products.stream()]
     item = list(filter(lambda x: x.get('id') == product_id, list_of_products))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     return flask.jsonify({'id': item[0].get('id'), 'name': item[0].get('name'), 'img': item[0].get('imgs')[0]})
 
 
@@ -51,7 +51,7 @@ def get_one_product_details(product_id):
     list_of_products = [i.to_dict() for i in products.stream()]
     item = list(filter(lambda x: x.get('id') == product_id, list_of_products))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     return flask.jsonify(item[0])
 
 
@@ -59,10 +59,10 @@ def get_one_product_details(product_id):
 def create_product():
     products = db.collection('products')
     if not flask.request.json:
-        return flask.jsonify({'error': 'Empty request'})
+        return flask.jsonify({'result': '400', 'text': 'Bad request'})
     elif not all(key in flask.request.json for key in
                  ['name', 'imgs', 'category', "price", "content", "productLink"]):
-        return flask.jsonify({'error': 'Bad request'})
+        return flask.jsonify({'result': '400', 'text': 'Bad request'})
     n = str(uuid.uuid4())
     categories = db.collection('categories')
     list_of_categories = [i.to_dict() for i in categories.stream()]
@@ -85,7 +85,7 @@ def create_product():
         "productLink": flask.request.json['productLink'],
         "createdAt": str(datetime.datetime.now())
     })
-    return flask.jsonify({'success': 'OK'})
+    return flask.jsonify({'result': '200', 'text': 'OK'})
 
 
 @blueprint.route('/products/<string:product_id>', methods=['PUT'])
@@ -94,10 +94,10 @@ def put_one_product(product_id):
     list_of_products = [i.to_dict() for i in products.stream()]
     item = list(filter(lambda x: x.get('id') == product_id, list_of_products))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     elif not all(key in flask.request.json for key in
                  ['name', 'imgs', 'category', "price", "content", "productLink"]):
-        return flask.jsonify({'error': 'Bad request'})
+        return flask.jsonify({'result': '400', 'text': 'Bad request'})
     products.document(product_id).set({
         'id': item[0].get('id'),
         'name': flask.request.json['name'],
@@ -108,7 +108,7 @@ def put_one_product(product_id):
         "productLink": flask.request.json['productLink'],
         "createdAt": item[0].get('createdAt')
     })
-    return flask.jsonify({'success': 'OK'})
+    return flask.jsonify({'result': '200', 'text': 'OK'})
 
 
 @blueprint.route('/products/delete/<string:product_id>', methods=['DELETE'])
@@ -117,9 +117,9 @@ def delete_product(product_id):
     list_of_products = [i.to_dict() for i in products.stream()]
     item = list(filter(lambda x: x.get('id') == product_id, list_of_products))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     products.document(item[0].get('id')).delete()
-    return flask.jsonify({'success': 'OK'})
+    return flask.jsonify({'result': '200', 'text': 'OK'})
 
 
 @blueprint.route('/categories')  # КАТЕГОРИИ
@@ -135,7 +135,7 @@ def get_one_category(category_id):
     list_of_categories = [i.to_dict() for i in categories.stream()]
     item = list(filter(lambda x: x.get('id') == category_id, list_of_categories))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     return flask.jsonify(item[0])
 
 
@@ -143,12 +143,12 @@ def get_one_category(category_id):
 def create_category():
     categories = db.collection('categories')
     if not flask.request.json:
-        return flask.jsonify({'error': 'Empty request'})
+        return flask.jsonify({'result': '400', 'text': 'Bad request'})
     elif not all(key in flask.request.json for key in ['name']):
-        return flask.jsonify({'error': 'Bad request'})
+        return flask.jsonify({'result': '400', 'text': 'Bad request'})
     n = str(uuid.uuid4())
     categories.document(n).set({'id': n, 'name': flask.request.json['name']})
-    return flask.jsonify({'success': 'OK'})
+    return flask.jsonify({'result': '200', 'text': 'OK'})
 
 
 @blueprint.route('/categories/<string:category_id>', methods=['PUT'])
@@ -157,11 +157,11 @@ def put_one_category(category_id):
     list_of_categories = [i.to_dict() for i in categories.stream()]
     item = list(filter(lambda x: x.get('id') == category_id, list_of_categories))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     elif not all(key in flask.request.json for key in ['name']):
-        return flask.jsonify({'error': 'Bad request'})
+        return flask.jsonify({'result': '400', 'text': 'Bad request'})
     categories.document(category_id).set({'id': item[0].get('id'), 'name': flask.request.json['name']})
-    return flask.jsonify({'success': 'OK'})
+    return flask.jsonify({'result': '200', 'text': 'OK'})
 
 
 @blueprint.route('/categories/delete/<string:category_id>', methods=['DELETE'])
@@ -170,9 +170,9 @@ def delete_category(category_id):
     list_of_categories = [i.to_dict() for i in categories.stream()]
     item = list(filter(lambda x: x.get('id') == category_id, list_of_categories))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     categories.document(item[0].get('id')).delete()
-    return flask.jsonify({'success': 'OK'})
+    return flask.jsonify({'result': '200', 'text': 'OK'})
 
 
 @blueprint.route('/products/category/<string:category_id>', methods=['GET'])
@@ -183,7 +183,7 @@ def find_all_of_category(category_id):
     list_of_categories = [i.to_dict() for i in categories.stream()]
     item = list(filter(lambda x: x.get('id') == category_id, list_of_categories))
     if not item:
-        return flask.jsonify({'error': 'Not found'})
+        return flask.jsonify({'result': '404', 'text': 'Not found'})
     items = list(filter(lambda x: x.get('category').get('id') == category_id, list_of_products))
     return flask.jsonify(items)
 
